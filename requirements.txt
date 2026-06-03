@@ -1,0 +1,12 @@
+fastapi==0.115.4
+uvicorn[standard]==0.32.1
+openai>=1.55.0
+supabase>=2.11.0
+pydantic==2.9.2
+pydantic-settings==2.6.1
+httpx>=0.28.1
+google-genai>=2.6.0
+python-dotenv==1.0.1
+langchain-core>=0.3.0
+langchain-openai>=0.2.0
+langchain-community>=0.3.0
