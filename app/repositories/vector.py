@@ -1,15 +1,28 @@
+import asyncio
 from app.clients.supabase import supabase_client
 
 
 class VectorRepository:
     async def similarity_search(
-        self, embedding: list[float], top_k: int = 5, threshold: float = 0.7
+        self,
+        embedding: list[float],
+        top_k: int = 5,
+        threshold: float = 0.4,
+        chunk_type: str | None = None,
     ) -> list[dict]:
-        # RAG 구현 시 활성화
-        raise NotImplementedError("RAG 미구현 — supabase/init.sql 실행 후 활성화")
+        def _rpc():
+            return supabase_client.rpc(
+                "match_benefits",
+                {
+                    "query_embedding": embedding,
+                    "filter_chunk_type": chunk_type,
+                    "match_threshold": threshold,
+                    "match_count": top_k,
+                },
+            ).execute()
 
-    async def insert_document(self, content: str, embedding: list[float], metadata: dict = {}) -> str:
-        raise NotImplementedError("RAG 미구현")
+        result = await asyncio.to_thread(_rpc)
+        return result.data or []
 
 
 vector_repository = VectorRepository()

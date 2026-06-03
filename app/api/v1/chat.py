@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.schemas.chat import ChatProcessRequest, ChatProcessResponse
 from app.services import intent as intent_service
 from app.services import chat as chat_service
+from app.services import rag as rag_service
 from app.services import suggestion as suggestion_service
 from app.exceptions import ChatbotException
 
@@ -19,9 +20,16 @@ async def process_chat(request: ChatProcessRequest) -> ChatProcessResponse:
     intent = intent_result.intent
 
     if intent == "text_rag":
-        # RAG 미구현 — text_simple로 폴백
-        logger.warning("text_rag → text_simple 폴백 (RAG 미구현)")
-        intent = "text_simple"
+        text = await rag_service.generate_rag_response(
+            request.message, request.chat_history, request.user_profile
+        )
+        suggestions = await suggestion_service.generate_suggestions(request.message, text)
+        return ChatProcessResponse(
+            intent=intent_result.intent,
+            text=text,
+            suggested_questions=suggestions,
+            extracted_user_info=intent_result.extracted_user_info,
+        )
 
     if intent == "text_simple":
         text = await chat_service.generate_simple_response(
